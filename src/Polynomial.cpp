@@ -37,11 +37,40 @@ Polynomial::Polynomial(const Monom& mon) {
 }
 
 Polynomial Polynomial::operator+(const Polynomial& other) const {
-	Polynomial result = *this;
-	for (const Monom& mon : other.polynomial) {
-		result.insertMonom(mon);
+	Polynomial result;
+	
+	result.polynomial.erase(result.polynomial.begin());
+
+	auto it1 = this->polynomial.begin();
+	auto it2 = other.polynomial.begin();
+
+	while (it1 != this->polynomial.end() && it2 != other.polynomial.end()) {
+		if (it1->canBeAdded(*it2)) {
+			Monom temp = *it1 + *it2;
+			result.polynomial.insert_before(temp, result.polynomial.end());
+			++it1;
+			++it2;
+		}
+		else if (*it1 < *it2) {
+			result.polynomial.insert_before(*it2, result.polynomial.end());
+			++it2;
+		}
+		else {
+			result.polynomial.insert_before(*it1, result.polynomial.end());
+			++it1;
+		}
 	}
-	result.rebalance();
+
+	while (it1 != this->polynomial.end()) {
+		result.polynomial.insert_before(*it1, result.polynomial.end());
+		++it1;
+	}
+
+	while (it2 != other.polynomial.end()) {
+		result.polynomial.insert_before(*it2, result.polynomial.end());
+		++it2;
+	}
+
 
 	return result;
 }
